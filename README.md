@@ -14,8 +14,8 @@ number that did work and retest the numbers until there are no 0's left.
 
 Along with this we will have other functions to generate a new board so that every time you play it is different as well as a function to remove numbers in order to
 make the game playable. To generate the board we will use the solve board function but instead of testing values 1-9 it will add a random number 1-9 to make sure the
-board is always random. The remove number function will simply go and delete random number from the board so that you can insert your own values and play the game. 
+board is always random. The remove number function will simply go and delete random numbers from the board so that you can insert your own values and play the game. 
 
-The rest of this program is the GUI, the first one I have ever made, and allows the user to select a square and have it highlighted so that you can insert a value 1-9. 
+The rest of this program is the GUI and allows the user to select a square and have it highlighted so that you can insert a value 1-9. 
 You can also press the ESC key to delete any values that you no longer want on the board. Once you no longer want to play, simply press the spacebar and sit back while 
 the computer does the work for you!
