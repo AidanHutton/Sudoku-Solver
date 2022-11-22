@@ -19,8 +19,8 @@ null_board = np.array([
 
 # Use a linear search to find all 0 values. (Blank squares that need to be solved)
 def find_null(board):
-    for x in range(len(board)):
-        for y in range(len(board)):
+    for x in range(9):
+        for y in range(9):
             if board[x][y] == 0:
                 return x, y
     return False
@@ -69,7 +69,7 @@ def generate_board(board):
     else:
         return True
 
-    for i in range(len(board)):
+    for i in range(9):
         numbers = random.randint(1, 9)
         if test_number(board, numbers, x, y):
             board[x][y] = numbers
@@ -121,8 +121,8 @@ def highlight():
     pygame.display.update()
 
     # Redraw the selected square with a new color to be highlighted.
-    for i in range(len(null_board)):
-        for j in range(len(null_board)):
+    for i in range(9):
+        for j in range(9):
             if (i + 1, j + 1) == board_coordinate:
                 pygame.draw.line(window, (102, 225, 0), start_top, end_top, 2)
                 pygame.draw.line(window, (102, 225, 0), start_bottom, end_bottom, 2)
@@ -133,6 +133,7 @@ def highlight():
 
 # Function to write in numbers and make it playable.
 def insert_number(number, selected):
+    # Allows numbers to only be added if they are withing the board. 
     for i in range(10):
         if selected < (1, 1) or selected > (9, 9) or selected == (i, 0) or selected == (i, 10):
             return False
@@ -163,8 +164,8 @@ def visual_solve(board):
         if test_number(board, i, x, y):
             board[x][y] = i
             font = pygame.font.SysFont('Times New Romans', 30)
-            for j in range(len(board)):
-                for k in range(len(board)):
+            for j in range(9):
+                for k in range(9):
                     if 0 < board[j][k] < 10:
                         value = font.render(str(board[j][k]), True, font_color)
                         window.blit(value, ((k + 1) * 55 + 23, (j + 1) * 55 + 23))
@@ -177,8 +178,8 @@ def visual_solve(board):
                 board[x][y] = 0
                 if board[x][y] == 0:
                     cor.fill(board_color)
-                    for j in range(len(board)):
-                        for k in range(len(board)):
+                    for j in range(9):
+                        for k in range(9):
                             if 0 < board[j][k] < 10:
                                 value = font.render(str(board[j][k]), True, font_color)
                                 window.blit(value, ((k + 1) * 55 + 23, (j + 1) * 55 + 23))
@@ -207,8 +208,8 @@ def main():
         pygame.draw.line(window, (0, 0, 0), (55, 55 + 55 * i), (550, 55 + 55 * i), 2)
     pygame.display.update()
 
-    for i in range(len(null_board)):
-        for j in range(len(null_board)):
+    for i in range(9):
+        for j in range(9):
             if 0 < null_board[i][j] < 10:
                 value = font.render(str(null_board[i][j]), True, font_color)
                 window.blit(value, ((j + 1) * 55 + 23, (i + 1) * 55 + 23))
