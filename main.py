@@ -3,107 +3,91 @@ import random
 import pygame
 
 
-# Null board to manipulate to make new boards when the program is ran.
-null_board = np.array([
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                     ])
+null_board = np.zeros((9, 9), dtype=int)
 
 
-# Use a linear search to find all 0 values. (Blank squares that need to be solved)
-def find_null(board):
-    for x in range(9):
-        for y in range(9):
-            if board[x][y] == 0:
-                return x, y
-    return False
+class Solver:
+    def __init__(self, arr):
+        self.arr = arr
 
+    def search(self):
+        for i in range(len(self.arr)):
+            for j in range(len(self.arr)):
+                if self.arr[i, j] == 0:
+                    return i, j
+        return False
 
-# Test numbers 1-9 to find valid numbers to fit into rows, columns and 3x3 boxes.
-def test_number(board, number, x, y):
-    for i in range(9):
-        if board[x][i] == number:
-            return False
-    for i in range(9):
-        if board[i][y] == number:
-            return False
-    x_box = (x // 3) * 3
-    y_box = (y // 3) * 3
-    for x_range in range(x_box, x_box + 3):
-        for y_range in range(y_box, y_box + 3):
-            if board[x_range][y_range] == number:
+    def test(self, number, x, y):
+        for i in range(len(self.arr)):
+            if self.arr[x, i] == number:
                 return False
-    return True
-
-
-# Uses recursion to solve any given Sudoku board utilizing the previous functions that we created.
-def solve_board(board):
-    null = find_null(board)
-    if null:
-        x, y = null
-    else:
+        for i in range(len(self.arr)):
+            if self.arr[i, y] == number:
+                return False
+        x_box = (x // 3) * 3
+        y_box = (y // 3) * 3
+        for i in range(x_box, x_box + 3):
+            for j in range(y_box, y_box + 3):
+                if self.arr[i, j] == number:
+                    return False
         return True
 
-    for i in range(1, 10):
-        if test_number(board, i, x, y):
-            board[x][y] = i
-            if solve_board(board):
-                return True
-            else:
-                board[x][y] = 0
-    return False
+    def solve(self):
+        null = self.search()
+        if null:
+            x, y = null
+        else:
+            return True
+
+        for i in range(1, 10):
+            if self.test(i, x, y):
+                self.arr[x, y] = i
+                if self.solve():
+                    return True
+                else:
+                    self.arr[x, y] = 0
+        return False
 
 
-# Generates a new Sudoku board that will always have a valid solution.
-def generate_board(board):
-    null = find_null(board)
-    if null:
-        x, y = null
-    else:
-        return True
+class Generate(Solver):
 
-    for i in range(9):
-        numbers = random.randint(1, 9)
-        if test_number(board, numbers, x, y):
-            board[x][y] = numbers
-            if generate_board(board):
-                return True
-            else:
-                board[x][y] = 0
-    return False
+    def generate(self):
+        null = self.search()
+        if null:
+            x, y = null
+        else:
+            return True
 
+        for i in range(9):
+            numbers = random.randint(1, 9)
+            if self.test(numbers, x, y):
+                self.arr[x, y] = numbers
+                if self.generate():
+                    return True
+                else:
+                    self.arr[x, y] = 0
+        return False
 
-# Removes numbers from the generated board to make it playable.
-def remove_number(board):
-    for i in range(72):
-        random_row = np.random.randint(9, size=1)
-        row = board[random_row[0], :]
-        index = list(range(len(row)))
-        random_index = random.sample(index, 1)
-        row[random_index] = 0
-    return board
-
-
-generate_board(null_board)
-remove_number(null_board)
+    def remove(self):
+        for i in range(72):
+            random_row = np.random.randint(9, size=1)
+            row = self.arr[random_row[0], :]
+            index = list(range(len(row)))
+            random_index = random.sample(index, 1)
+            row[random_index] = 0
+        return self.arr
 
 
+play_board = Generate(null_board)
+play_board.generate()
+play_board.remove()
 size = 600
 board_color = (251, 247, 245)
 font_color = (0, 0, 0)
 window = pygame.display.set_mode((size, size))
 
 
-# Allows the user to be able to click a square on the board and have it highlighted.
 def highlight():
-    # Use integer division to get the square you are clicking in given the coordinate of the mouse.
     position = pygame.mouse.get_pos()
     board_coordinate = tuple(pos // 55 for pos in position)
     start_top = tuple(co * 55 for co in board_coordinate)
@@ -111,7 +95,6 @@ def highlight():
     start_bottom = (start_top[0], start_top[1] + 55)
     end_bottom = (start_top[0] + 55, start_top[1] + 55)
 
-    # When you click on a new square the board will be redrawn to un-highlight the previous square.
     for i in range(10):
         if i % 3 == 0:
             pygame.draw.line(window, (0, 0, 0), (55 + 55 * i, 55), (55 + 55 * i, 550), 4)
@@ -120,7 +103,6 @@ def highlight():
         pygame.draw.line(window, (0, 0, 0), (55, 55 + 55 * i), (550, 55 + 55 * i), 2)
     pygame.display.update()
 
-    # Redraw the selected square with a new color to be highlighted.
     for i in range(9):
         for j in range(9):
             if (i + 1, j + 1) == board_coordinate:
@@ -131,9 +113,7 @@ def highlight():
             pygame.display.update()
 
 
-# Function to write in numbers and make it playable.
 def insert_number(number, selected):
-    # Allows numbers to only be added if they are within the board.
     for i in range(10):
         if selected < (1, 1) or selected > (9, 9) or selected == (i, 0) or selected == (i, 10):
             return False
@@ -144,34 +124,30 @@ def insert_number(number, selected):
         pygame.display.update()
 
 
-# Function to erase a number you no longer want on the board.
 def erase_number(square):
     pygame.draw.rect(window, board_color, pygame.Rect(square[0] * 55 + 3, square[1] * 55 + 3, 40, 40))
     pygame.display.update()
 
 
-# This function will allow the user to be able to visually watch the board be solved.
 def visual_solve(board):
     cor = pygame.display.get_surface()
-    null = find_null(board)
+    tools = Solver(board)
+    null = tools.search()
     if not null:
         return True
     else:
         x, y = null
 
-    # Slightly modified version of the solve_board function that writes in the number while its tested.
     for i in range(1, 10):
-        if test_number(board, i, x, y):
-            board[x][y] = i
+        if tools.test(i, x, y):
+            board[x, y] = i
             font = pygame.font.SysFont('Times New Romans', 30)
             for j in range(9):
                 for k in range(9):
-                    if 0 < board[j][k] < 10:
-                        value = font.render(str(board[j][k]), True, font_color)
+                    if 0 < board[j, k] < 10:
+                        value = font.render(str(board[j, k]), True, font_color)
                         window.blit(value, ((k + 1) * 55 + 23, (j + 1) * 55 + 23))
                 pygame.display.update()
-
-            # Check if the board has been solved and if not erase the number that was written and repeat.
             if visual_solve(board):
                 return True
             else:
@@ -221,7 +197,6 @@ def main():
                 pygame.quit()
                 return
 
-            # All mouse and keybindings.
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 highlight()
                 position = pygame.mouse.get_pos()
